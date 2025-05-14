@@ -132,7 +132,12 @@ export function makeLogin() {
   }
 }
 
-
+export async function logout() {
+  const result = await fetch("https://localhost:7076/api/auth/logout", {
+    method: "POST",
+    credentials: 'include'
+  });
+}
 
 function findEmptyValues(fields){
   for (var fieldName in fields) {

@@ -1,0 +1,27 @@
+<h1>Создание продукта</h1>
+
+<form id="productForm">
+  <label>Название:
+    <input type="text" name="name" required minlength="3" maxlength="20">
+  </label><br><br>
+
+  <label>Описание:
+    <textarea name="description" maxlength="300"></textarea>
+  </label><br><br>
+
+  <label>Расположение:
+    <input type="text" name="location" required>
+  </label><br><br>
+
+  <label>Количество:
+    <input type="number" name="quantity" min="1" max="200" required>
+  </label><br><br>
+
+  <label>Изображение:
+    <input type="file" id="imageInput" name="images" accept="image/*" multiple required>
+  </label><br><br>
+
+  <button type="submit">Создать</button>
+<form>
+
+  <p class="error-message"></p>

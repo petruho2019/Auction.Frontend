@@ -8,37 +8,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 <script defer src="../main_bundle.js"></script></head>
 <body>
+  <header>
+    <button style="display: flex; justify-content: end;" class="logout-button-header" hidden>Logout</button>
+  </header>
+
   <main>
     <div class="main">
-      <h1>Создание продукта</h1>
+      <h1>Все аукционы</h1>
 
-<form id="productForm">
-  <label>Название:
-    <input type="text" name="name" required minlength="3" maxlength="20">
-  </label><br><br>
+<div class="auctions">
 
-  <label>Описание:
-    <textarea name="description" maxlength="300"></textarea>
-  </label><br><br>
-
-  <label>Расположение:
-    <input type="text" name="location" required>
-  </label><br><br>
-
-  <label>Количество:
-    <input type="number" name="quantity" min="1" max="200" required>
-  </label><br><br>
-
-  <label>Цена:
-    <input type="number" name="price" min="1" max="10000000">
-  </label><br><br>
-
-  <label>Изображение:
-    <input type="file" id="imageInput" accept="image/*" required>
-  </label><br><br>
-
-  <button type="submit">Создать</button>
-<form>
+</div>
     </div>
   </main>
   

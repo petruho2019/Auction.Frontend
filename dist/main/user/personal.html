@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>personal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<script defer src="../../main_bundle.js"></script></head>
+<body>
+  <header>
+    <button style="display: flex; justify-content: end;" class="logout-button-header" hidden>Logout</button>
+  </header>
+
+  <main>
+    <div class="main">
+      <div class="sidebar">
+    <h2>Профиль</h2>
+    <p><strong>Имя:</strong> <span id="username">Загрузка...</span></p>
+    <p><strong>Email:</strong> <span id="email">Загрузка...</span></p>
+  </div>
+
+  <div class="content">
+    <h2>Мои продукты</h2>
+    <div id="productGrid" class="grid"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        // Получение информации о пользователе
+        const userRes = await fetch("https://localhost:7076/api/user/me", {
+          credentials: 'include'
+        });
+        const user = await userRes.json();
+        document.getElementById("username").textContent = user.username;
+        document.getElementById("email").textContent = user.email;
+
+        // Получение списка продуктов
+        const productRes = await fetch("https://localhost:7076/api/product/list", {
+          credentials: 'include'
+        });
+        const products = await productRes.json();
+        const grid = document.getElementById("productGrid");
+
+        if (products.length === 0) {
+          grid.innerHTML = "<p>Продукты не найдены.</p>";
+        } else {
+          for (const product of products) {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const imageUrl = product.images?.[0]
+              ? `https://localhost:7076/images/${product.images[0]}`
+              : "https://via.placeholder.com/200x140?text=Нет+фото";
+
+            card.innerHTML = `
+              <img src="${imageUrl}" alt="Product Image" />
+              <h4>${product.name}</h4>
+              <p>${product.description || "Без описания"}</p>
+              <p><strong>Локация:</strong> ${product.location}</p>
+              <p><strong>Кол-во:</strong> ${product.quantity}</p>
+              <p><strong>Создан:</strong> ${new Date(product.dateCreate).toLocaleDateString()}</p>
+            `;
+            grid.appendChild(card);
+          }
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке данных:", err);
+      }
+    });
+  </script>
+    </div>
+  </main>
+  
+
+  
+</body>
+</html>
