@@ -1,68 +1,163 @@
 <div class="sidebar">
-    <h2>Профиль</h2>
-    <p><strong>Имя:</strong> <span id="username">Загрузка...</span></p>
-    <p><strong>Email:</strong> <span id="email">Загрузка...</span></p>
-  </div>
+  <h2>Профиль</h2>
+  <p><strong>Имя:</strong> <span id="username">Загрузка...</span></p>
+  <p><strong>Email:</strong> <span id="email">Загрузка...</span></p>
+</div>
 
-  <div class="content">
-    <h2>Мои продукты</h2>
-    <div id="productGrid" class="grid"></div>
-  </div>
+<div class="content">
+  <h2>Мои продукты</h2>
+  <div id="product-grid" class="grid"></div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const userRes = await fetch("https://localhost:7076/api/user/me", {
+        credentials: 'include'
+      });
+      const user = await userRes.json();
+      document.getElementById("username").textContent = user.username;
+      document.getElementById("email").textContent = user.email;
 
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        // Получение информации о пользователе
-        const userRes = await fetch("https://localhost:7076/api/user/me", {
-          credentials: 'include'
-        });
-        const user = await userRes.json();
-        document.getElementById("username").textContent = user.username;
-        document.getElementById("email").textContent = user.email;
+      const productRes = await fetch("https://localhost:7076/api/product/list", {
+        credentials: 'include'
+      });
+      const products = await productRes.json();
+      const grid = document.getElementById("product-grid");
 
-        // Получение списка продуктов
-        const productRes = await fetch("https://localhost:7076/api/product/list", {
-          credentials: 'include'
-        });
-        const products = await productRes.json();
-        const grid = document.getElementById("productGrid");
+      if (products.length === 0) {
+        grid.innerHTML = "<p>Продукты не найдены.</p>";
+      } else {
+        for (const product of products) {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.setAttribute("data-product-id", product.productId);
 
-        if (products.length === 0) {
-          grid.innerHTML = "<p>Продукты не найдены.</p>";
-        } else {
-          let count = 0;
-          for (const product of products) {
-            
-            const card = document.createElement("div");
-            card.className = "card";
+          let imagesHtml = "";
+          if (product.images?.length > 0) {
+            imagesHtml = `
+              <div class="slider">
+                <button class="prev">&#10094;</button>
+                <div class="slider-track">
+                  ${product.images.map(image => {
+                    const imageUrl = `https://localhost:7076/images/${image.replace(/\\/g, '/').split('/').pop()}`;
+                    return `<img src="${imageUrl}" alt="Product Image" class="product-image" />`;
+                  }).join('')}
+                </div>
+                <button class="next">&#10095;</button>
+              </div>
+            `;
+          } else {
+            imagesHtml = `<img src="https://via.placeholder.com/200x140?text=Нет+фото" alt="Product Image" class="product-image" />`;
+          }
 
-            let imagesHtml = "";
-            if (product.images?.length > 0) {
-              product.images.forEach(image => {
-                const imageUrl = `https://localhost:7076/images/${image.replace(/\\/g, '/').split('/').pop()}`;
-                imagesHtml += `<img src="${imageUrl}" alt="Product Image" class="product-image" />`;
-              });
-            } else {
-              imagesHtml = `<img src="https://via.placeholder.com/200x140?text=Нет+фото" alt="Product Image" class="product-image" />`;
+          const auctionPanelId = `auction-panel-${product.productId}`;
+          card.innerHTML = `
+            <div class="images-container">${imagesHtml}</div>
+            <h4>Название: ${product.name}</h4>
+            <p><strong>Описание:</strong>: ${product.description || "Без описания"}</p>
+            <p><strong>Локация:</strong> ${product.location}</p>
+            <p><strong>Кол-во:</strong> ${product.quantity}</p>
+            <p><strong>Создан:</strong> ${new Date(product.dateCreate).toLocaleDateString()}</p>
+            <button class="create-auction-btn">Создать аукцион</button>
+            <div class="auction-panel" id="${auctionPanelId}">
+              <form>
+                <label>Цена: <input type="number" name="price" required min="1" /></label>
+                <label>Дата начала: <input type="datetime-local" name="dateStart" required /></label>
+                <label>Дата окончания: <input type="datetime-local" name="dateEnd" required /></label>
+                <label>Количество: <input type="number" name="quantity" required min="1" max="${product.quantity}" /></label>
+                <div class="error"></div>
+                <button type="submit">Подтвердить</button>
+              </form>
+            </div>
+          `;
+          grid.appendChild(card);
+
+          // Обработчики кнопки "Создать аукцион"
+          const toggleBtn = card.querySelector(".create-auction-btn");
+          const auctionPanel = card.querySelector(`#${auctionPanelId}`);
+          toggleBtn.addEventListener("click", () => {
+            auctionPanel.classList.toggle("open");
+          });
+
+          // Валидация формы
+          const form = auctionPanel.querySelector("form");
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorDiv = form.querySelector(".error");
+            errorDiv.textContent = "";
+
+            const formData = new FormData(form);
+            const price = Number(formData.get("price"));
+            const quantity = Number(formData.get("quantity"));
+            const dateStart = new Date(formData.get("dateStart"));
+            const dateEnd = new Date(formData.get("dateEnd"));
+
+            if (price <= 0) {
+              errorDiv.textContent = "Цена должна быть больше 0.";
+              return;
             }
 
-            card.innerHTML = `
-              <div class="images-container">
-                ${imagesHtml}
-              </div>
-              <h4>${product.name}</h4>
-              <p>${product.description || "Без описания"}</p>
-              <p><strong>Локация:</strong> ${product.location}</p>
-              <p><strong>Кол-во:</strong> ${product.quantity}</p>
-              <p><strong>Создан:</strong> ${new Date(product.dateCreate).toLocaleDateString()}</p>
-            `;
-            grid.appendChild(card);
+            if (dateStart < Date.now()) {
+              errorDiv.textContent = "Дата начала не может быть раньше текущего времени.";
+              return;
+            }
 
-            count++;
-          }
+
+            if (dateStart >= dateEnd) {
+              errorDiv.textContent = "Дата окончания должна быть позже даты начала.";
+              return;
+            }
+
+            if (quantity <= 0 || quantity > product.quantity) {
+              errorDiv.textContent = `Количество должно быть от 1 до ${product.quantity}.`;
+              return;
+            }
+
+            const resultCreateAuction = await fetch("https://localhost:7076/api/auction/create", {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                Price: price,
+                DateStart: dateStart.toISOString(),
+                DateEnd: dateEnd.toISOString(),
+                Quantity: quantity,
+                ProductId: product.productId
+              })
+            });
+
+            if (!resultCreateAuction.ok){
+              const textError = await resultCreateAuction.json();
+
+              errorDiv.textContent = Object.values(textError.errors)[0][0];
+              return;
+            }
+
+            alert(`Аукцион создан:\nЦена: ${price}\nНачало: ${dateStart}\nОкончание: ${dateEnd}\nКол-во: ${quantity}`);
+          });
         }
-      } catch (err) {
-        console.error("Ошибка при загрузке данных:", err);
+
+        // Обработчики слайдеров
+        document.querySelectorAll(".slider").forEach(slider => {
+          const track = slider.querySelector(".slider-track");
+          const prev = slider.querySelector(".prev");
+          const next = slider.querySelector(".next");
+          const image = slider.querySelector(".product-image");
+          const scrollStep = image.offsetWidth;
+
+          prev.addEventListener("click", () => {
+            track.scrollBy({ left: -scrollStep, behavior: "smooth" });
+          });
+
+          next.addEventListener("click", () => {
+            track.scrollBy({ left: scrollStep, behavior: "smooth" });
+          });
+        });
       }
-    });
-  </script>
+    } catch (err) {
+      console.error("Ошибка при загрузке данных:", err);
+    }
+  });
+</script>

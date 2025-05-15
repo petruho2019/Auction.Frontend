@@ -1,12 +1,12 @@
 import '../styles/index.css'
 import '../styles/general.css'
 import '../styles/personal.css'
+import '../styles/auction.css'
 import './auth/auth.js'
 import './product/product.js'
 import './auction/auction.js'
 import { login, makeRegister, logout } from './auth/auth.js';
 import { createProduct } from './product/product.js'
-import { fetchAuctions } from './auction/auction.js';
 
 
 async function initHandlers() {
@@ -21,12 +21,6 @@ async function initHandlers() {
     productForm.addEventListener("submit", async (event) => {
       await createProduct(event);
     });
-  }
-}
-
-async function initPages(path) {
-  if (path === '/') {
-    await fetchAuctions();
   }
 }
 
@@ -51,7 +45,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = '/auth';
   } 
 
-  await initPages(path);
 });
 
 async function checkAuth() {
