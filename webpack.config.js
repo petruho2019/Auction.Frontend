@@ -63,6 +63,10 @@ module.exports = {
     },
     historyApiFallback: {
       rewrites: [
+        {
+          from: /^\/auction\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+          to: '/main/auction/detail.html'
+        },
         { from: /^\/auth$/, to: "/auth/auth.html" },
         { from: /^\/productAdd$/, to: "/main/products/add.html" },
         { from: /^\/personal$/, to: "/main/user/personal.html" },

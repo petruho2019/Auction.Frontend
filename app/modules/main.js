@@ -9,6 +9,7 @@ import { login, makeRegister, logout } from './auth/auth.js';
 import { createProduct } from './product/product.js'
 
 
+
 async function initHandlers() {
   const loginBtn = document.querySelector(".login-button");
   if (loginBtn) loginBtn.onclick = login;
